@@ -1,0 +1,5 @@
+# Ignorar ambiente virtual e variaveis do DB
+.venv
+.env
+# Ignorar arquivos de cache
+__pycache__
