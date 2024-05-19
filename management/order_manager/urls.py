@@ -7,7 +7,11 @@ from .views import (
     ItemDetail,
     ItemCreate,
     ItemUpdate,
-    ItemDestroy
+    ItemDestroy,
+    OrderList,
+    OrderCreate,
+    OrderClienteDetail,
+    OrderEmployeeDetail
     )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -24,6 +28,12 @@ urlpatterns = [
     path('item/<int:pk>/', ItemDetail.as_view()),
     path('item/up/<int:pk>/', ItemUpdate.as_view()),
     path('item/del/<int:pk>/', ItemDestroy.as_view()),
+
+    path('orders/', OrderList.as_view()),
+    path('order/add/', OrderCreate.as_view()),
+    path('order/<int:pk>/', OrderClienteDetail.as_view()),
+    path('user/<int:pk>/order/', OrderList.as_view()),
+    path('user/<int:user_pk>/order/<int:order_pk>/', OrderEmployeeDetail.as_view()),
 
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
