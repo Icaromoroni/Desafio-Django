@@ -20,6 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
 
         if request and request.user and request.user.is_superuser:
             self.fields['is_staff'] = serializers.BooleanField()
+        if self.instance is None:
+            self.fields['username'].read_only = False
 
     def create(self, validated_data):
         user = User(
@@ -57,8 +59,39 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OrderSerializer(serializers.ModelSerializer):
+class OrderCreateSerializer(serializers.ModelSerializer):
+    itens = serializers.PrimaryKeyRelatedField(many=True, queryset=Item.objects.all())
 
     class Meta:
         model = Order
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user_req = self.context['request'].user
+        if not user_req.is_staff:
+            self.fields['user'].required = False
+
+    def create(self, validated_data):
+        item_ids = validated_data.pop('itens')
+        user_req = self.context['request'].user
+
+        if user_req.is_staff and 'user' in validated_data:
+            user = validated_data.pop('user')
+
+        else:
+            user = user_req
+
+        order = Order.objects.create(user=user, **validated_data)
+        order.itens.set(item_ids)
+        order.att_total()
+        return order
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    itens = ItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+    
