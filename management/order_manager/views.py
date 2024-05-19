@@ -4,6 +4,7 @@ from .serializers import UserSerializer, ItemSerializer, OrderSerializer
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import make_password
+from .permission import IsStaffUser
 
 
 
@@ -77,12 +78,38 @@ class UserDetailUpdate(generics.RetrieveUpdateAPIView):
         serializer.save()
 
 
-class ItemListCreate(generics.ListCreateAPIView):
-    pass
+class ItemList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    
 
 
-class ItemRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    pass
+class ItemDetail(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    
+
+
+class ItemCreate(generics.CreateAPIView):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    permission_classes = [IsStaffUser]
+    
+
+class ItemUpdate(generics.UpdateAPIView):
+    permission_classes = [IsStaffUser]
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    
+
+
+class ItemDestroy(generics.DestroyAPIView):
+    permission_classes = [IsStaffUser]
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    
 
 
 class OrderListCreate(generics.ListCreateAPIView):
