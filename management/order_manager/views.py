@@ -1,11 +1,11 @@
+from django.http import Http404
 from .models import Item, Order
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, ItemSerializer, OrderSerializer
+from .serializers import UserSerializer, ItemSerializer, OrderCreateSerializer, OrderListSerializer
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import make_password
 from .permission import IsStaffUser
-
 
 
 User = get_user_model()
@@ -79,6 +79,8 @@ class UserDetailUpdate(generics.RetrieveUpdateAPIView):
 
 
 class ItemList(generics.ListAPIView):
+    """Usuário autenticado lista todos os itens"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
@@ -86,6 +88,8 @@ class ItemList(generics.ListAPIView):
 
 
 class ItemDetail(generics.RetrieveAPIView):
+    """Usuário autenticado detalhes itens especificos"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
@@ -93,12 +97,16 @@ class ItemDetail(generics.RetrieveAPIView):
 
 
 class ItemCreate(generics.CreateAPIView):
+    """Usuários funcionarios autenticados cria itens especificos"""
+
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
     permission_classes = [IsStaffUser]
     
 
 class ItemUpdate(generics.UpdateAPIView):
+    """Usuários funcionarios autenticados atualiza itens especificos"""
+
     permission_classes = [IsStaffUser]
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
@@ -106,11 +114,66 @@ class ItemUpdate(generics.UpdateAPIView):
 
 
 class ItemDestroy(generics.DestroyAPIView):
+    """Usuários funcionarios autenticados deleta itens especificos"""
+
     permission_classes = [IsStaffUser]
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
     
 
 
-class OrderListCreate(generics.ListCreateAPIView):
-    pass
+class OrderList(generics.ListAPIView):
+    """Usuários autenticados lista seus pesidos especificos, 
+    caso o usuário seja funcionario pode listar os orders do cliente fornecendo o id no endpoint"""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderListSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff:
+            pk = self.kwargs.get('pk')
+
+            if pk:
+                return Order.objects.filter(user__pk=pk)
+            
+            return Order.objects.all()
+        
+        return Order.objects.filter(user__pk=user.pk)
+
+class OrderCreate(generics.CreateAPIView):
+    """Usuários autenticados cria pedidos"""
+    permission_classes = [IsAuthenticated]
+    queryset = Order.objects.all()
+    serializer_class = OrderCreateSerializer
+
+class OrderClienteDetail(generics.RetrieveAPIView):
+    """Usuários autenticados visualiza detalhe pedidos especificos"""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderListSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        try:
+            return Order.objects.filter(user__pk=user.pk)
+        except Order.DoesNotExist:
+            raise Http404("Pedido não encontrado.")
+
+
+class OrderEmployeeDetail(generics.RetrieveAPIView):
+    """Usuários funcionarios autenticados visualiza detalhe de
+    pedidos especificos de usuários especificos"""
+
+    permission_classes = [IsStaffUser]
+    serializer_class = OrderListSerializer
+
+    def get_object(self):
+        user_pk = self.kwargs.get('user_pk')
+        order_pk = self.kwargs.get('order_pk')
+        try:
+            return Order.objects.get(user__id=user_pk, id=order_pk)
+        except Order.DoesNotExist:
+            raise Http404("Pedido não encontrado.")
+
