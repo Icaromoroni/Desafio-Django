@@ -11,14 +11,17 @@ User = get_user_model()
 
 
 class UserList(generics.ListAPIView):
+    """Somente usuários(funcionários) e administradores podem listar todos os usuários clientes"""
 
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff:
-            return User.objects.filter(is_superuser=False)
+        if user.is_staff and user.is_superuser:
+            return User.objects.all()
+        elif user.is_staff and not user.is_superuser:
+            return User.objects.filter(is_superuser=False, is_staff=False)
         else:
             self.permission_denied(self.request)
 
@@ -31,7 +34,8 @@ class UserCreate(generics.ListCreateAPIView):
 
 
 class UserDetailUpdate(generics.RetrieveUpdateAPIView):
-    """Usuário visualiza detalhes ou atualiza dados do usuário"""
+    """Usuário(cliente) visualiza detalhes ou atualiza seus dados, 
+    usuários(funcionários) visualiza detalhes e atualiza seus dados e de todos os clientes"""
 
     permission_classes = [IsAuthenticated]
 
@@ -40,10 +44,20 @@ class UserDetailUpdate(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        if user.is_staff:
+        if user.is_staff and user.is_superuser:
             return User.objects.all()
+        
+        elif user.is_staff and not user.is_superuser:
+            pk = self.kwargs.get('pk')
+
+            if user.pk == pk:
+                return User.objects.filter(pk=user.pk)
+            
+            return User.objects.filter(is_staff=False)
+        
         elif not user.is_staff:
             return User.objects.filter(pk=user.pk)
+        
         else:
             return User.objects.none()
         
