@@ -6,7 +6,7 @@
 ## Sobre 💬
 **Desafio Django:** recebi uma tarefa de criar uma API RESTful que gerencia usuários, pedidos e itens. O app do projeto foi nomeado como **Order Manager** pois retrata sua tarefa de gerenciar pedidos de itens por usuário.
 
-O app gerencia a criação, autenticação, lista, atualização e visualização dos detalhes dos dados de usuários e suas permissoes no sistema, de maneira semelhante realiza a gestão de itens e pedidos.
+A API gerencia a criação, autenticação, lista, atualização e visualização dos detalhes dos dados de usuários e suas permissoes no sistema, de maneira semelhante realiza a gestão de itens e pedidos.
 
 ## Ferramentas 🔧
 - [Django](https://www.djangoproject.com/)
