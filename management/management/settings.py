@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     # app
     'order_manager.apps.OrderManagerConfig',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -98,7 +99,16 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Projeto Management API',
+    'DESCRIPTION': 'Endepoints e documentação do app Order manager',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
 }
 
 SIMPLE_JWT = {
