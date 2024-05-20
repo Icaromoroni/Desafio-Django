@@ -50,7 +50,12 @@ $ venv/Scripts/activate
 ```bash
 $ pip install -r requirements.txt
 ```
+## Abrir projeto 📂
+<p>Abra o projeto no seu editor de texto VSCode ou outro de sua preferência.</p>
+
 ### Cria o arquivo ".env"
+<p>No seu editor de texto crie um arquivo ".env" na pasta raiz do projeto e dentro do arquivo criado configure seu banco de dados local utilizando o exemplo abaixo.</p>
+
 ```code
 DB_NAME = nome_do_banco_de_dados
 DB_USER = usuario do DB
@@ -79,8 +84,8 @@ $ python manage.py runserver
 ### Acessa a rota da documentação
 <http://localhost:8000/api/swagger/>
 
-<p>Realiza o login com o nome do usuário e senha que no item "criar um super usuário", após fazer o login é so seguir as descrições nos endpoints</p>
+<p>Realize a autenticação fornecendo o nome do usuário e senha que foi criado no item "criar um super usuário", após fazer a autenticação siga as descrições nos endpoint.</p>
 
-### Exemplo em vídeo abaixo
-[Video de exemplo para ralizar a autenticação do usuário.](https://youtu.be/4qG0Vh6cDF8?si=h4TQSYBVDrYn1OuL)
+### Demonstração no vídeo abaixo
+[Realizar a autenticação do usuário.](https://youtu.be/4qG0Vh6cDF8?si=h4TQSYBVDrYn1OuL)
 
