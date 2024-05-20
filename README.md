@@ -82,5 +82,5 @@ $ python manage.py runserver
 <p>Realiza o login com o nome do usuário e senha que no item "criar um super usuário", após fazer o login é so seguir as descrições nos endpoints</p>
 
 ### Exemplo em vídeo abaixo
-![Video de exemplo para ralizar a autenticação do usuário.](https://youtu.be/4qG0Vh6cDF8)
+![Video de exemplo para ralizar a autenticação do usuário.](https://youtu.be/4qG0Vh6cDF8?si=h4TQSYBVDrYn1OuL)
 
