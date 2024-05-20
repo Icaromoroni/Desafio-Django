@@ -12,7 +12,13 @@ User = get_user_model()
 
 
 class UserList(generics.ListAPIView):
-    """Somente usuários(funcionários) e administradores podem listar todos os usuários clientes"""
+    """
+    Permissões de:<br/>
+    1. Conta de Funcionário.<br/>
+    1.1. Lista todos os usuários que não são funcionários.<br/><br/>
+    2. Super Usuário.<br/>
+    2.1. Lista todos os usuários do sistema.<br/>
+    """
 
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
@@ -27,16 +33,31 @@ class UserList(generics.ListAPIView):
             self.permission_denied(self.request)
 
 
-class UserCreate(generics.ListCreateAPIView):
-    """Qualquer usuário anônimo pode criar uma conta de usuário(cliente)"""
+class UserCreate(generics.CreateAPIView):
+    """
+    Usuários:<br/>
+    1. Anônimos.<br/>
+    1.1 Qualquer usuário anônimo pode criar uma conta como cliente.<br/><br/>
+    2. Funcionário.<br/>
+    2.1. Pode criar contas para clientes.<br/><br/>
+    3. Super Usuário.<br/>
+    3.1. Pode criar contas para clientes e Funcionários.<br/>
+    3.2. Para criar contas de super user deve setar o campo is_staff com true.
+    """
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
 
 class UserDetailUpdate(generics.RetrieveUpdateAPIView):
-    """Usuário(cliente) visualiza detalhes ou atualiza seus dados, 
-    usuários(funcionários) visualiza detalhes e atualiza seus dados e de todos os clientes"""
+    """
+    1. Method GET.<br/>
+    1.1. Usuário(cliente) visualiza detalhes.<br/>
+    1.2. Usuários(funcionários) visualiza detalhes de seus dados e de e dados de clientes.<br/><br/>
+    2. Method PUT ou PATH.<br/>
+    2.1. Usuário(cliente) atualiza seus dados.<br/>
+    2.2. Usuários(funcionários) atualiza seus dados ou dados de clientes.<br/>
+    """
 
     permission_classes = [IsAuthenticated]
 
@@ -79,7 +100,7 @@ class UserDetailUpdate(generics.RetrieveUpdateAPIView):
 
 
 class ItemList(generics.ListAPIView):
-    """Usuário autenticado lista todos os itens"""
+    """Todos os Usuários podem listar os itens do sistema"""
 
     permission_classes = [IsAuthenticated]
     serializer_class = ItemSerializer
@@ -88,7 +109,7 @@ class ItemList(generics.ListAPIView):
 
 
 class ItemDetail(generics.RetrieveAPIView):
-    """Usuário autenticado detalhes itens especificos"""
+    """Todos os usuários podem visualizar os detalhes de itens específicos"""
 
     permission_classes = [IsAuthenticated]
     serializer_class = ItemSerializer
@@ -97,7 +118,7 @@ class ItemDetail(generics.RetrieveAPIView):
 
 
 class ItemCreate(generics.CreateAPIView):
-    """Usuários funcionarios autenticados cria itens especificos"""
+    """Somente Funcionários e super usuários podem criar itens"""
 
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
@@ -105,7 +126,7 @@ class ItemCreate(generics.CreateAPIView):
     
 
 class ItemUpdate(generics.UpdateAPIView):
-    """Usuários funcionarios autenticados atualiza itens especificos"""
+    """Somente Funcionários e super usuários podem atualizar itens"""
 
     permission_classes = [IsStaffUser]
     serializer_class = ItemSerializer
@@ -114,7 +135,7 @@ class ItemUpdate(generics.UpdateAPIView):
 
 
 class ItemDestroy(generics.DestroyAPIView):
-    """Usuários funcionarios autenticados deleta itens especificos"""
+    """Somente Funcionários e super usuários podem deletar itens"""
 
     permission_classes = [IsStaffUser]
     serializer_class = ItemSerializer
@@ -123,8 +144,14 @@ class ItemDestroy(generics.DestroyAPIView):
 
 
 class OrderList(generics.ListAPIView):
-    """Usuários autenticados lista seus pesidos especificos, 
-    caso o usuário seja funcionario pode listar os orders do cliente fornecendo o id no endpoint"""
+    """
+    Listar Pedidos:<br/>
+    1. Endpoint /api/orders/:<br/>
+    1.1 Usuários com conta cliente pode listar todos os seus pedidos.<br/>
+    1.2 Funcionários e super usuário lista todos os pedidos registrados no sistema.<br/><br/>
+    2. Endpoint /api/orders/user/user_id:<br/>
+    2.1. Funcionários ou super usuário pode visualizar os detalhes de qualquer pedido com o ID do usuário(cliente).
+    """
 
     permission_classes = [IsAuthenticated]
     serializer_class = OrderListSerializer
@@ -143,13 +170,20 @@ class OrderList(generics.ListAPIView):
         return Order.objects.filter(user__pk=user.pk)
 
 class OrderCreate(generics.CreateAPIView):
-    """Usuários autenticados cria pedidos"""
+    """
+    Criar pedidos:<br/>
+    1. Usuários com conta cliente pode criar pedidos somente para seu perfil.<br/>
+    2. Funcionários e super usuário pode criar pedidos para clientes
+    """
     permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
     serializer_class = OrderCreateSerializer
 
 class OrderClienteDetail(generics.RetrieveAPIView):
-    """Usuários autenticados visualiza detalhe pedidos especificos"""
+    """
+    Visualizar detalhe:<br/>
+    1. Nesse endpoint somente o usuários com conta cliente pode visualizar somente detalhe de seus pedidos.
+    """
 
     permission_classes = [IsAuthenticated]
     serializer_class = OrderListSerializer
@@ -163,8 +197,10 @@ class OrderClienteDetail(generics.RetrieveAPIView):
 
 
 class OrderEmployeeDetail(generics.RetrieveAPIView):
-    """Usuários funcionarios autenticados visualiza detalhe de
-    pedidos especificos de usuários especificos"""
+    """
+    Listar detalhes de pedidos de clientes:<br/>
+    1. Funcionários ou super usuários podem acessar pedidos específicos de clientes com o endpoint /api/user/<int:user_pk>/order/<int:order_pk>/.
+    """
 
     permission_classes = [IsStaffUser]
     serializer_class = OrderListSerializer
