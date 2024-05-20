@@ -48,7 +48,7 @@ $ venv/Scripts/activate
 ```
 ### Instala as dependências
 ```bash
-$ pip freeze > requirements.txt
+$ pip install -r requirements.txt
 ```
 ### Cria o arquivo ".env"
 ```code
