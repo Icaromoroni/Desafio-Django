@@ -159,15 +159,24 @@ class OrderList(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        if user.is_staff:
-            pk = self.kwargs.get('pk')
+        try:
+            orders_user = User.objects.get(pk= user.pk).orders
 
-            if pk:
-                return Order.objects.filter(user__pk=pk)
+            if user.is_staff:
+                pk = self.kwargs.get('pk')
+                orders_user = User.objects.get(pk=pk).orders if pk else None
+
+                if pk and not orders_user.exists():
+                    raise Http404("O cliente não possue pedidos.")
+
+                elif pk and orders_user.exists():
+                    return Order.objects.filter(user__pk=pk)
+                                
+                return Order.objects.all()
             
-            return Order.objects.all()
-        
-        return Order.objects.filter(user__pk=user.pk)
+            return Order.objects.filter(user__pk=user.pk)
+        except Order.DoesNotExist:
+            raise Http404("Não há pedidos.")
 
 class OrderCreate(generics.CreateAPIView):
     """
@@ -190,8 +199,14 @@ class OrderClienteDetail(generics.RetrieveAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        order_pk = self.kwargs.get('pk')
+
         try:
-            return Order.objects.filter(user__pk=user.pk)
+            order_user = Order.objects.get(id=order_pk, user__pk=user.pk)
+
+            if order_user:
+                return Order.objects.filter(pk=order_pk, user__pk=user.pk)
+            
         except Order.DoesNotExist:
             raise Http404("Pedido não encontrado.")
 
@@ -208,8 +223,10 @@ class OrderEmployeeDetail(generics.RetrieveAPIView):
     def get_object(self):
         user_pk = self.kwargs.get('user_pk')
         order_pk = self.kwargs.get('order_pk')
+
         try:
-            return Order.objects.get(user__id=user_pk, id=order_pk)
+            return Order.objects.get(user__pk=user_pk, pk=order_pk)
+        
         except Order.DoesNotExist:
             raise Http404("Pedido não encontrado.")
 
